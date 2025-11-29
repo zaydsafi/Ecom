@@ -6,7 +6,7 @@ import ProductImg from "../assets/images/Mens/eight.jpg";
 const Cart = () => {
   return (
     <Layout>
-      <div className="container product-detail">
+      <div className="container product-detail pb-5">
         <div className="row">
           <div className="col-md-12">
             <nav aria-label="breadcrumb" className="py-4">
@@ -100,10 +100,27 @@ const Cart = () => {
           </div>
         </div>
 
-        <div className="row">
+        <div className="row justify-content-end">
           <div className="col-md-3">
-            <div className="d-flex">
+            <div className="d-flex justify-content-between border-bottom pb-2">
               <div>Sub Total</div>
+              <div>$5</div>
+            </div>
+
+            <div className="d-flex justify-content-between border-bottom py-2">
+              <div>Shipping</div>
+              <div>$5</div>
+            </div>
+
+            <div className="d-flex justify-content-between border-bottom py-2">
+              <div>
+                <strong>Grand Total</strong>
+              </div>
+              <div>$5</div>
+            </div>
+
+            <div className="d-flex justify-content-end py-3">
+              <button className="btn btn-primary">Procced to Checkout</button>
             </div>
           </div>
         </div>
