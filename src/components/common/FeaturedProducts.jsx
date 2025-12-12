@@ -5,9 +5,9 @@ import Men2 from "../../assets/images/Mens/eleven.jpg";
 const FeaturedProducts = () => {
   return (
     <>
-      <div className="section-2 py-3">
+      <div className="section-2 py-1">
         <div className="container">
-          <h2 className="text-center mb-5">Featured Products</h2>
+          <h2 className="text-center mb-3">Featured Products</h2>
           <div className="row mt-4">
             <div className="col-md-3 col-6">
               <div className="product card border-0">

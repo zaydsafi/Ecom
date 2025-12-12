@@ -1,0 +1,464 @@
+// import React, { useEffect, useState, useRef, useMemo } from "react";
+// import { Link, useNavigate } from "react-router-dom";
+// import Sidebar from "../../common/Sidebar";
+// import Layout from "../../common/Layout";
+// import { useForm } from "react-hook-form";
+// import { toast } from "react-toastify";
+// import { adminToken, apiUrl } from "../../common/http";
+// import JoditEditor from "jodit-react";
+
+// const Create = ({ placeholder }) => {
+//   const editor = useRef(null);
+//   const [content, setContent] = useState("");
+//   const [disable, setDisable] = useState(false);
+//   const [categories, setCategories] = useState([]);
+//   const [brands, setBrands] = useState([]);
+//   const [gallery, setGallery] = useState([]);
+//   const [galleryImages, setGalleryImages] = useState([]);
+//   const navigate = useNavigate();
+//   const {
+//     register,
+//     handleSubmit,
+//     watch,
+//     setError,
+//     formState: { errors },
+//   } = useForm();
+
+//   const config = useMemo(
+//     () => ({
+//       readonly: false, // all options from https://xdsoft.net/jodit/docs/,
+//       placeholder: placeholder || "Start typings...",
+//     }),
+//     [placeholder]
+//   );
+
+//   const saveProduct = async (data) => {
+//     const formData = { ...data, description: content, gallery: gallery };
+//     setDisable(true);
+//     console.log(data);
+//     const res = await fetch(`${apiUrl}/products`, {
+//       method: "POST",
+//       headers: {
+//         "Content-type": "application/json",
+//         Accept: "application/json",
+//         Authorization: `Bearer ${adminToken()}`,
+//       },
+//       body: JSON.stringify(formData),
+//     })
+//       .then((res) => res.json())
+//       .then((result) => {
+//         setDisable(false);
+//         if (result.status == 200) {
+//           toast.success(result.message);
+//           navigate("/admin/products");
+//         } else {
+//           const formErrors = result.errors;
+//           Object.keys(formErrors).forEach((field) => {
+//             setError(field, { message: [field][0] });
+//           });
+//         }
+//       });
+//   };
+
+//   const fetchCategories = async () => {
+//     const res = await fetch(`${apiUrl}/categories`, {
+//       method: "GET",
+//       headers: {
+//         "Content-type": "application/json",
+//         Accept: "application/json",
+//         Authorization: `Bearer ${adminToken()}`,
+//       },
+//     })
+//       .then((res) => res.json())
+//       .then((result) => {
+//         // console.log(result)
+//         setCategories(result.data);
+//       });
+//   };
+
+//   const fetchBrands = async () => {
+//     const res = await fetch(`${apiUrl}/brands`, {
+//       method: "GET",
+//       headers: {
+//         "Content-type": "application/json",
+//         Accept: "application/json",
+//         Authorization: `Bearer ${adminToken()}`,
+//       },
+//     })
+//       .then((res) => res.json())
+//       .then((result) => {
+//         // console.log(result)
+//         setBrands(result.data);
+//       });
+//   };
+
+//   const handleFile = async (e) => {
+//     const formData = new FormData();
+//     const file = e.target.files[0];
+//     formData.append("image", file);
+//     console.log(file);
+//     setDisable(true);
+
+//     const res = await fetch(`${apiUrl}/temp-images`, {
+//       method: "POST",
+//       headers: {
+//         "Accept": "application/json",
+//         "Authorization": `Bearer ${adminToken()}`,
+//       },
+//       body: formData,
+//     })
+//       .then((res) => res.json())
+//       .then((result) => {
+//         gallery.push(result.data.id);
+//         setGallery(gallery);
+
+//         galleryImages.push(result.data.image_url);
+//         setGalleryImages(galleryImages);
+//         setDisable(false);
+//         e.target.value = ""
+//         // console.log(result);
+//       });
+//   };
+
+//   const deleteImage = (image) => {
+//     const newGallery = galleryImages.filter(gallery => gallery != image)
+//     setGalleryImages(newGallery)
+//   }
+
+//   useEffect(() => {
+//     fetchCategories();
+//     fetchBrands();
+//   }, []);
+
+//   return (
+//     <>
+//       <Layout>
+//         <div className="container">
+//           <div className="row">
+//             <div className="d-flex justify-content-between mt-5 pb-3">
+//               <h4 className="h4 pb-0 mb-0">Products / Create</h4>
+//               <Link to={"/admin/products"} className="btn btn-primary">
+//                 Back
+//               </Link>
+//             </div>
+//             <div className="col-md-3">
+//               <Sidebar />
+//             </div>
+//             <div className="col-md-9">
+//               <form onSubmit={handleSubmit(saveProduct)}>
+//                 <div className="card shadow">
+//                   <div className="card-body p-4">
+//                     <div className="mb-3">
+//                       <label htmlFor="title" className="form-label">
+//                         Title
+//                       </label>
+//                       <input
+//                         type="text"
+//                         name="title"
+//                         id=""
+//                         {...register("title", {
+//                           required: "The title field is required",
+//                         })}
+//                         placeholder="Enter Product title"
+//                         className={`form-control ${
+//                           errors.title && "is-invalid"
+//                         }`}
+//                       />
+//                       {errors.title && (
+//                         <p className="invalid-feedback">
+//                           {errors.title?.message}
+//                         </p>
+//                       )}
+//                     </div>
+
+//                     <div className="row">
+//                       <div className="col-md-6">
+//                         <div className="mb-3">
+//                           <label htmlFor="category" className="form-label">
+//                             Category
+//                           </label>
+//                           <select
+//                             {...register("category", {
+//                               required: "Please select a category",
+//                             })}
+//                             className={`form-control ${
+//                               errors.category && "is-invalid"
+//                             }`}
+//                           >
+//                             <option value="">Select a Category</option>
+//                             {categories.map((category) => (
+//                               <option
+//                                 key={`category-${category.id}`}
+//                                 value={category.id}
+//                               >
+//                                 {category.name}
+//                               </option>
+//                             ))}
+//                           </select>
+//                           {errors.category && (
+//                             <p className="invalid-feedback">
+//                               {errors.category?.message}
+//                             </p>
+//                           )}
+//                         </div>
+//                       </div>
+//                       <div className="col-md-6">
+//                         <div className="mb-3">
+//                           <label htmlFor="brand" className="form-label">
+//                             Brand
+//                           </label>
+//                           <select
+//                             {...register("brand")}
+//                             className={`form-control`}
+//                           >
+//                             <option value="">Select a brand</option>
+//                             {brands.map((brand) => (
+//                               <option
+//                                 key={`brand-${brand.id}`}
+//                                 value={brand.id}
+//                               >
+//                                 {brand.name}
+//                               </option>
+//                             ))}
+//                           </select>
+//                           {errors.brand && (
+//                             <p className="invalid-feedback">
+//                               {errors.brand?.message}
+//                             </p>
+//                           )}
+//                         </div>
+//                       </div>
+//                     </div>
+
+//                     <div className="mb-3">
+//                       <label htmlFor="" className="form-label">
+//                         Short Description
+//                       </label>
+//                       <textarea
+//                         type="text"
+//                         name="shortDescription"
+//                         {...register("short_description")}
+//                         id=""
+//                         placeholder="Enter Product shortDescription"
+//                         className={`form-control`}
+//                         rows={3}
+//                       ></textarea>
+//                     </div>
+
+//                     <div className="mb-3">
+//                       <label htmlFor="" className="form-label">
+//                         Description
+//                       </label>
+//                       <JoditEditor
+//                         {...register("description")}
+//                         ref={editor}
+//                         value={content}
+//                         config={config}
+//                         tabIndex={1} // tabIndex of textarea
+//                         onBlur={(newContent) => setContent(newContent)} // preferred to use only this option to update the content for performance reasons
+//                       />
+//                     </div>
+
+//                     <h3 className="py-3 border-bottom mb-3">Pricing</h3>
+
+//                     <div className="row">
+//                       <div className="col-md-6">
+//                         <div className="mb-3">
+//                           <label htmlFor="price" className="form-label">
+//                             Price
+//                           </label>
+//                           <input
+//                             type="number"
+//                             name="price"
+//                             id=""
+//                             {...register("price", {
+//                               required: "The price field is required",
+//                             })}
+//                             placeholder="Enter Product Price"
+//                             className={`form-control ${
+//                               errors.price && "is-invalid"
+//                             }`}
+//                           />
+//                           {errors.price && (
+//                             <p className="invalid-feedback">
+//                               {errors.price?.message}
+//                             </p>
+//                           )}
+//                         </div>
+//                       </div>
+//                       <div className="col-md-6">
+//                         <div className="mb-3">
+//                           <label
+//                             htmlFor="discontedPrice"
+//                             className="form-label"
+//                           >
+//                             Disconted Price
+//                           </label>
+//                           <input
+//                             type="number"
+//                             name="discontedPrice"
+//                             {...register("compare_price")}
+//                             id=""
+//                             placeholder="Enter Product discontedPrice"
+//                             className={`form-control`}
+//                           />
+//                         </div>
+//                       </div>
+//                     </div>
+
+//                     <h3 className="py-3 border-bottom mb-3">Inventory</h3>
+
+//                     <div className="row">
+//                       <div className="col-md-6">
+//                         <div className="mb-3">
+//                           <label htmlFor="sku" className="form-label">
+//                             SKU
+//                           </label>
+//                           <input
+//                             type="text"
+//                             name="sku"
+//                             id=""
+//                             {...register("sku", {
+//                               required: "The sku field is required",
+//                             })}
+//                             placeholder="Enter Product sku"
+//                             className={`form-control ${
+//                               errors.sku && "is-invalid"
+//                             }`}
+//                           />
+//                           {errors.sku && (
+//                             <p className="invalid-feedback">
+//                               {errors.sku?.message}
+//                             </p>
+//                           )}
+//                         </div>
+//                       </div>
+//                       <div className="col-md-6">
+//                         <div className="mb-3">
+//                           <label htmlFor="barcode" className="form-label">
+//                             Barcode
+//                           </label>
+//                           <input
+//                             type="text"
+//                             name="barcode"
+//                             {...register("barcode")}
+//                             id=""
+//                             placeholder="Enter Product barcode"
+//                             className={`form-control`}
+//                           />
+//                         </div>
+//                       </div>
+//                     </div>
+
+//                     <div className="row">
+//                       <div className="col-md-6">
+//                         <div className="mb-3">
+//                           <label htmlFor="qty" className="form-label">
+//                             QTY
+//                           </label>
+//                           <input
+//                             type="number"
+//                             name="qty"
+//                             {...register("qty")}
+//                             id=""
+//                             placeholder="Enter Product qty"
+//                             className={`form-control`}
+//                           />
+//                         </div>
+//                       </div>
+//                       <div className="col-md-6">
+//                         <div className="mb-3">
+//                           <label htmlFor="status" className="form-label">
+//                             Status
+//                           </label>
+//                           <select
+//                             {...register("status", {
+//                               required: "Please select a status",
+//                             })}
+//                             className={`form-control ${
+//                               errors.status && "is-invalid"
+//                             }`}
+//                           >
+//                             <option value="">Select a Status</option>
+//                             <option value="1">Active</option>
+//                             <option value="0">Block</option>
+//                           </select>
+//                           {errors.status && (
+//                             <p className="invalid-feedback">
+//                               {errors.status?.message}
+//                             </p>
+//                           )}
+//                         </div>
+//                       </div>
+//                     </div>
+
+//                     <div className="mb-3">
+//                       <label htmlFor="is_featured" className="form-label">
+//                         Featured
+//                       </label>
+//                       <select
+//                         {...register("is_featured", {
+//                           required: "Please select a is_featured",
+//                         })}
+//                         className={`form-control ${
+//                           errors.is_featured && "is-invalid"
+//                         }`}
+//                       >
+//                         <option value="1">Yes</option>
+//                         <option value="0">No</option>
+//                       </select>
+//                       {errors.is_featured && (
+//                         <p className="invalid-feedback">
+//                           {errors.is_featured?.message}
+//                         </p>
+//                       )}
+//                     </div>
+
+//                     <h3 className="py-3 border-bottom mb-3">Gallary</h3>
+
+//                     <div className="mb-3">
+//                       <label htmlFor="image" className="form-label">
+//                         Image
+//                       </label>
+//                       <input
+//                         type="file"
+//                         name="image"
+//                         onChange={handleFile}
+//                         id=""
+//                       />
+//                     </div>
+
+//                     <div className="mb-3">
+//                       <div className="row">
+//                         {galleryImages &&
+//                           galleryImages.map((image, index) => {
+//                             return (
+//                               <div className="col-md-3" key={`image-${index}`}>
+//                                 <div className="card shadow">
+//                                   <img src={image} alt="" className="w-100 h-100" />
+//                                   <button className="btn btn-danger btn-sm" onClick={() => deleteImage(image)}>Delete</button>
+//                                 </div>
+//                               </div>
+//                             );
+//                           })}
+//                       </div>
+//                     </div>
+//                   </div>
+//                 </div>
+//                 <button
+//                   disabled={disable}
+//                   type="submit"
+//                   className="btn btn-primary mt-3 mb-3"
+//                 >
+//                   Create
+//                 </button>
+//               </form>
+//             </div>
+//           </div>
+//         </div>
+//       </Layout>
+//     </>
+//   );
+// };
+
+// export default Create;
